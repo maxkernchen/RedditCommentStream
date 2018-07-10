@@ -1,10 +1,10 @@
 import praw
-from praw.models import MoreComments;
+from datetime import datetime
 import praw.config
 def write_comments(comment_url):
-    reddit = praw.Reddit(client_id='missingforprivacy',
-    client_secret='missingforprivacy',
-    user_agent='missingforprivacy')
+    reddit = praw.Reddit(client_id='',
+    client_secret='',
+    user_agent=' 0.1')
     # get the submission from the link passed in
     submission = reddit.submission(url=comment_url)
 
@@ -13,7 +13,7 @@ def write_comments(comment_url):
     #only get comments and then sort by new
     comment_list = submission.comments
     comment_list = sorted(comment_list, key=lambda comment: comment.created_utc,reverse=True)
-    comment_body = []
+    comments_returned = []
     i = 0
 
     for comment in comment_list:
@@ -21,11 +21,12 @@ def write_comments(comment_url):
     # print(comment.body)
      #   print(comment.created_utc)
 
-        comment_body.append(comment.body)
+        comments_returned.append(str(datetime.fromtimestamp(comment.created_utc)) + " - " + comment.body)
+
     # return the comments only
     print("number of comments: ", i)
 
-    return comment_body
+    return comments_returned
 
 if __name__ == "__main__":
     write_comments()

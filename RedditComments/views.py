@@ -24,8 +24,10 @@ def reddit_url(request):
             print(form.cleaned_data['reddit_url'])
             comments = CommentStream.write_comments(form.cleaned_data['reddit_url'])
 
+
     # if a GET (or any other method) we'll create a blank form
     else:
         form = RedditURL()
 
     return render(request, 'comments.html', {'comments_template': comments})
+
