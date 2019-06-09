@@ -19,5 +19,7 @@ from RedditComments import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('index/', views.index, name='index'),
-    path('process-url/', views.reddit_url, name='reddit_url')
+    path('process-url/', views.process_reddit_url, name='reddit_url'),
+    path('index_new_stream/', views.index_new_stream, name='index_new_stream')
+
 ]

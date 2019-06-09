@@ -1,0 +1,10 @@
+{% load static%}
+
+.index-header{
+    color: white;
+
+}
+.center{
+    margin: 0 auto;
+    float: none;
+}

@@ -66,48 +66,9 @@
 
     <script>
 
+/* This will be the same page, but with no fade ins. For when errors occur or we want to try a new URL.
 
-
-// Function to wait before next fade in. Using promises and setTimeOut method.
-// Currently will resolve after one second.
-        function resolveAfter1Second() {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve('resolved');
-    }, 1000);
-  });
-}
-
-// Function fade_in_elements.
-// This will fade in the elements of the main screen.
-// This will not occur when the page is reloaded because of an error or to start a new comment stream
-async function fade_in_elements() {
-    var fade_in_wait = 1000;
-
-    $('#fade_text_0').hide();
-    $('#fade_text_1').hide();
-    $('#nba_example').hide()
-    $('#form_comment_url').hide()
-
-    $('#fade_text_0').fadeIn(fade_in_wait);
-
-    await resolveAfter1Second();
-
-    $('#nba_example').fadeIn(fade_in_wait);
-
-    await resolveAfter1Second();
-
-   $('#fade_text_1').fadeIn(fade_in_wait);
-
-   await resolveAfter1Second();
-
-  $('#form_comment_url').fadeIn(fade_in_wait);
-
-}
-
-fade_in_elements();
-
-
+*/
     </script>
 </div>
 </html>
