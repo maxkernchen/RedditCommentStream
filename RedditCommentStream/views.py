@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from .forms import RedditURL
 from . import comment_stream
 from . import active_submissions
-from RedditComments.models import ActiveSubmissions
+from RedditCommentStream.models import ActiveSubmissions
 import logging
 logger = logging.getLogger(__name__)
 __author__  = 'Max Kernchen'
@@ -40,7 +40,7 @@ def process_reddit_url(request):
 
         if form.is_valid():
             comment_url = form.cleaned_data['reddit_url']
-            submission_id = comment_stream.parse_submission_id(comment_url)
+            submission_id = comment_stream.get_submission_id_from_url(comment_url)
             logger.info('Starting new stream for sub_id=' + submission_id)
             # get local browser tz offset, this is stored in hidden input field.
             tz_offset = request.POST['time_zone_offset']
@@ -74,10 +74,10 @@ def process_reddit_url(request):
             # return with a error message defiend in the HTML template
             return render(request, 'index.html', {'error': 'invalid url', 'active_submissions_template':
                                               active_submissions.query_active_submissions()})
-    # ajax call for refresh of comments will be a GET request
+    # fetch call for refresh of comments will be a GET request
     elif request.method == 'GET':
         # use current url to find submission id.
-        submission_id_get = comment_stream.parse_ajax_submission_id(request.path)
+        submission_id_get = comment_stream.parse_submission_id(request.path)
         # get tz offset from ajax data parameters
         tz_offset = request.GET['time_zone_offset']
         if submission_id_get:

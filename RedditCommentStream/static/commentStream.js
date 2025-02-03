@@ -93,6 +93,8 @@ async function startRace (){
               startRace()
           }
           });
+          
+
   }
   else{
       startRace();

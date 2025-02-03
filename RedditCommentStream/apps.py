@@ -8,7 +8,7 @@ RedditCommentsConfig which allows us to use a custom AppConfig and override the 
 This is so we can spawn a background thread and setup our global logger
 """
 class RedditCommentsConfig(AppConfig):
-    name = 'RedditComments'
+    name = 'RedditCommentStream'
 
     def ready(self):
         """ Overridden ready method which will require us to import inline modules

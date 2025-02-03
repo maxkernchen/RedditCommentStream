@@ -1,6 +1,6 @@
 RedditCommentsLog.txt*
 praw.ini
-RedditComments/custom_profanity_keywords.txt
-RedditComments/settings.py
+RedditCommentStream/custom_profanity_keywords.txt
+RedditCommentStream/settings.py
 */__pycache__/*
 db.sqlite3

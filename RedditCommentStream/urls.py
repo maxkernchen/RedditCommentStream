@@ -1,4 +1,4 @@
-"""RedditComments URL Configuration
+"""RedditCommentStream URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/2.0/topics/http/urls/
@@ -14,11 +14,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from RedditComments import views
+from django.urls import path, include, re_path
+from RedditCommentStream import views
 from django.views.generic import RedirectView
-from django.conf.urls import url
 urlpatterns = [
     path('reddit-comment-stream/', views.index, name='index'),
-    url(r'^process-url\/*.*$', views.process_reddit_url, name='reddit_url')
+    re_path(r'^process-url\/*.*$', views.process_reddit_url, name='reddit_url')
 ]

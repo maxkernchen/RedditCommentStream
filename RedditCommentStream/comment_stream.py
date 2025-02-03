@@ -30,7 +30,7 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
         @return a dictionary with comments sorted by newest, the title and permalink if this is a POST request
     """
     config = configparser.ConfigParser()
-    config_dir = Path(os.getcwd() + '/RedditComments/praw.ini')
+    config_dir = Path(os.getcwd() + '/RedditCommentStream/praw.ini')
     config.read(config_dir)
 
     reddit_obj = praw.Reddit(client_id=config['bot1']['client_id'],
@@ -85,7 +85,7 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
     submission_comments_dict['comments_body'] = comments_body
     return submission_comments_dict
 
-def parse_submission_id(comment_url):
+def get_submission_id_from_url(comment_url):
     """ Simple helper method which will parse the full url of the reddit page and find the submission_id only
     This is useful as it allows the user to enter only the partial url or just the submission_id in the form.
      -----params----
@@ -136,9 +136,8 @@ def detect_hyper_link(comment_text):
     return comment_text
 
 
-def parse_ajax_submission_id(processing_url):
+def parse_submission_id(processing_url):
     """ Simple helper method which will parse the submission id from our processing url.
-    This is used for any ajax get call.
      -----params----
     @processing_url - processing url in format /process-url/123abc
 

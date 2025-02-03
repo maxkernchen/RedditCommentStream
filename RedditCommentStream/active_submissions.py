@@ -6,7 +6,7 @@ import praw.models.reddit.more
 import prawcore.exceptions
 import requests
 from django.db import transaction
-from RedditComments.models import ActiveSubmissions
+from RedditCommentStream.models import ActiveSubmissions
 from praw.models import MoreComments
 from better_profanity import profanity
 from pathlib import Path
@@ -39,7 +39,7 @@ def get_active_submissions():
 
     """
     # read the reddit config and login using our OAuth2 credentials
-    config_dir = Path(os.getcwd() + '/RedditComments/praw.ini')
+    config_dir = Path(os.getcwd() + '/RedditCommentStream/praw.ini')
     config = configparser.ConfigParser()
     config.read(config_dir)
 
@@ -139,7 +139,7 @@ def add_excluded_subreddits(all_list, reddit_obj):
 
     """
     excluded_subreddits = []
-    excluded_subreddits_dir = Path(os.getcwd() + '/RedditComments/excluded_subreddits_add.txt')
+    excluded_subreddits_dir = Path(os.getcwd() + '/RedditCommentStream/excluded_subreddits_add.txt')
     with open(excluded_subreddits_dir) as file:
         excluded_subreddits = file.read().splitlines()
     for subreddit in excluded_subreddits:
@@ -157,7 +157,7 @@ def filter_posts(all_list):
     profanity.load_censor_words()
     # A file will be opened to read some custom profanity keywords which show up on more inappropriate subreddits
     custom_badwords = []
-    custom_badwords_dir = Path(os.getcwd() + '/RedditComments/custom_profanity_keywords.txt')
+    custom_badwords_dir = Path(os.getcwd() + '/RedditCommentStream/custom_profanity_keywords.txt')
     with open(custom_badwords_dir) as file:
         custom_badwords = file.read().splitlines()
     profanity.add_censor_words(custom_badwords)
