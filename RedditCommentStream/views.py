@@ -28,7 +28,7 @@ def index(request):
 def process_reddit_url(request):
     """
     Method for loading the comments page, will be used for both POST (original form submission) and GET
-    (ajax in-page refresh request) requests. Defined in URLS.py
+    (fetch in-page refresh request) requests. Defined in URLS.py
 
     @return - a rendered page for /process_url or in case of errors /index.html with an error message
     """
@@ -78,7 +78,7 @@ def process_reddit_url(request):
     elif request.method == 'GET':
         # use current url to find submission id.
         submission_id_get = comment_stream.parse_submission_id(request.path)
-        # get tz offset from ajax data parameters
+        # get tz offset from fetch url query 
         tz_offset = request.GET['time_zone_offset']
         if submission_id_get:
             comments_dict = comment_stream.get_comments(submission_id_get, request, False, tz_offset)
@@ -91,7 +91,7 @@ def process_reddit_url(request):
             if(comment_list is not None and len(comments_body) > 0):
                 return render(request, 'comment_body.html', {'comments_template': comment_list})
             else:
-                # Status 204 is okay for ajax response as it will then just call again after the refresh rate.
+                # Status 204 is okay for fetch response as it will then just call again after the refresh rate.
                 return HttpResponse(status=204)
 
 

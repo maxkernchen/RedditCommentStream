@@ -16,7 +16,7 @@ updateAllDateTimeLocale();
 /* Create three promises that will race each other.
 1. promise1 - This promise is only resolved if refresh rate is not 'Don't Refresh' ( > 0).
               It is resolved after the amount of the time the refresh rate is defined for passes.
-              Then we will call ajax to reload the comments in page.
+              Then we will call fetch to reload the comments in page.
 2. promise2 - This promise is resolved whenever the refresh rate drop down has changed value.
               This means that if the refresh rate is changed while we are waiting for a new refresh, the current
               refresh wait time is reset.
@@ -62,7 +62,7 @@ async function startRace (){
 
   Promise.race([promise1, promise2, promise3]).then(function(value) {
 
-  // Make the ajax call to Django server if we have a > 0 refresh rate
+  // Make the fetch call to Django server if we have a > 0 refresh rate
   // and we have not scrolled to where the manual refresh button is showing.
   // But always refresh if we were called from the refresh button directly (resolve code 2)
   if((refreshRateInt > 0 && value > 0 && !scrolledDown) || value == 2){
@@ -70,29 +70,28 @@ async function startRace (){
         if(value == 2){
           $('html').animate({ scrollTop: 0 }, 'slow');
         }
-        let url = window.location.pathname
-        $.ajax({
-          url: url,
-          data: { 
-            time_zone_offset: offset
-          },
-          type: 'get',
-          success: function(data, textStatus, jqXHR) {
-            // status will be 204 for no new comments found
-            if(jqXHR.status == 200){
-              reloadComments(data);
-            }
-            else{
-              $('#spinner').hide();
-              startRace();
-            }
-          },
-          // in case anything goes wrong with the ajax call, log it and try again.
-          failure: function(data) {
-              console.log('refreshing comments failed');
-              startRace()
+
+        $('#spinner').show();
+        toggleTheme(true);
+
+        let url = window.location.pathname;
+        const query = {time_zone_offset: offset};
+        let fetchParams = new URLSearchParams(query);
+        
+        fetch(url + "?" + fetchParams, {
+          method: 'GET'
+        }).then(response => response.text()).then(data =>{
+          if(data){
+            reloadComments(data);
           }
-          });
+          else{
+            $('#spinner').hide();
+            startRace();
+          }
+        }).catch(error =>{
+          console.log('Refreshing Comments Failed: ' + error);
+          startRace();
+        });
           
 
   }
@@ -117,7 +116,7 @@ async function reloadComments(data){
   $('#spinner').hide();
 
   document.getElementById('inner-comment-list').insertAdjacentHTML('afterbegin', data);
-  // make sure theme persists between ajax calls.
+  // make sure theme persists between fetch calls.
   toggleTheme(true);
   $('#new-comments').hide();
   updateNewDateTimeLocale();
@@ -128,17 +127,13 @@ async function reloadComments(data){
   // call entry method again.
   startRace();
 }
-// method that is called when any ajax call starts.
-// currently just for showing the spinner and keeping the dark or light theme.
-$( document ).ajaxStart(function() {
-  $('#spinner').show();
-  toggleTheme(true);
-});
+
+
 
 
 
 /* Method toggleTheme. This method allows us the change the theme of the page from dark to light.
-@param - keepSame - This means we just reload the current theme again, this is needed after the ajax call.
+@param - keepSame - This means we just reload the current theme again, this is needed after the fetch call.
 */
 function toggleTheme(keepSame) {
 

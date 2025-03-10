@@ -13,7 +13,7 @@ __author__  = 'Max Kernchen'
 __version__ = '1.0.'
 __email__   = 'max.f.kernchen@gmail.com'
 
-""" This module's main purpose is to retreive the latest comments from a submission, it is called often via ajax or the 
+""" This module's main purpose is to retreive the latest comments from a submission, it is called often via fetch or the 
 post request from our index form submission.
 """
 
