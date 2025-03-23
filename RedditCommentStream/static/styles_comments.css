@@ -49,6 +49,14 @@ li{
    text-align: center;
    width: 100%
 }
+.hidden{
+   transition: 500ms opacity;
+   opacity: 0;
+}
+.hidden.fade-in{
+   opacity: 1;
+}
+
 .header-item{
    margin-right: 2vw;
 }
