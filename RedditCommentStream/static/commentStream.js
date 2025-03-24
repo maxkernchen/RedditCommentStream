@@ -1,13 +1,13 @@
 document.getElementById('spinner').style.display = 'none';
 document.getElementById('refresh-btn').style.display = 'none';
 
-var offset = new Date().getTimezoneOffset();
+const offset = new Date().getTimezoneOffset();
 // bool for when scrolled down past our header, this for tracking if we should refresh or not.
 // Similar to youtube or twitch comments where scrolling stops the refreshing. 
-var scrolledDown = false;
+let scrolledDown = false;
 
 //global boolean for our theme, light == true, dark == false
-var lightTheme = true;
+let lightTheme = true;
 
 loadOrCreateCookie();
 toggleTheme(true);
@@ -28,10 +28,10 @@ updateAllDateTimeLocale();
 
 async function startRace (){
   // get current refresh rate if refresh rate < 0 we don't refresh.
-  let refreshRateSelect = document.getElementById('refresh-rate-options');
-  let refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
+  const refreshRateSelect = document.getElementById('refresh-rate-options');
+  const refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
 
-  let promiseRefreshRate = new Promise(function(resolve) {
+  const promiseRefreshRate = new Promise(function(resolve) {
     // only resolve this promise if refresh rate is not set to don't refresh.'
     // resolve after the amount of time defined in the refresh rate drop down.
       if(refreshRateInt > 0 && !scrolledDown) {
@@ -45,16 +45,16 @@ async function startRace (){
   });
 
   // second promise which is resolved whenever the refresh rate drop is changed.
-  let promiseRefreshChanged = new Promise(function(resolve) {
+  const promiseRefreshChanged = new Promise(function(resolve) {
       document.getElementById('refresh-rate-options').addEventListener('change', function(){
-          let refreshRateSelect = document.getElementById('refresh-rate-options');
-          let refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
+          const refreshRateSelect = document.getElementById('refresh-rate-options');
+          const refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
           updateRefreshRateCookie(refreshRateInt)
           resolve('-2');
       });
   });
   // third promise is the refresh button is clicked so refresh data right away.
-  let promiseRefreshClicked = new Promise(function(resolve) {
+  const promiseRefreshClicked = new Promise(function(resolve) {
     document.getElementById('refresh-btn').addEventListener('click', () => {
       resolve(2);
     });
@@ -74,12 +74,12 @@ async function startRace (){
         document.getElementById('spinner').style.display='';
         toggleTheme(true);
 
-        let url = window.location.pathname;
+        const url = window.location.pathname;
         const query = {time_zone_offset: offset};
-        let fetchParams = new URLSearchParams(query);
+        const fetchParams = new URLSearchParams(query);
         
         try{
-          let data = await (await fetch(url + "?" + fetchParams, {
+          const data = await (await fetch(url + "?" + fetchParams, {
             method: 'GET'
           })).text();
 
@@ -141,10 +141,10 @@ async function reloadComments(data){
 */
 function toggleTheme(keepSame) {
 
-  let themeBtn      = document.getElementById('theme-btn');
-  let icon          = document.getElementById('theme-btn-icon');
-  let container     = document.getElementById('container');
-  let comments      = document.getElementsByClassName('list-group-item');
+  const themeBtn      = document.getElementById('theme-btn');
+  const icon          = document.getElementById('theme-btn-icon');
+  const container     = document.getElementById('container');
+  const comments      = document.getElementsByClassName('list-group-item');
   let tempThemeBool = false;
   // if currently set to light set to dark and vice versa.
   if(lightTheme && !keepSame){
@@ -218,8 +218,8 @@ function toggleTheme(keepSame) {
 */
 function applyDropDownStyle(){
 
-  let dropdownItems = document.getElementsByClassName('dropdown-item');
-  let dropdownMenu  = document.getElementsByClassName('dropdown-menu')[0];
+  const dropdownItems = document.getElementsByClassName('dropdown-item');
+  const dropdownMenu  = document.getElementsByClassName('dropdown-menu')[0];
   
   if(lightTheme){
      dropdownMenu.classList.remove('dark'); 
@@ -237,13 +237,13 @@ function applyDropDownStyle(){
 
 // use bootstrap select built-in event to trigger themes for drop down menus
 //$('#refresh-rate-options').on('show.bs.select', applyDropDownStyle);
-var refreshRateOptions = document.getElementById('refresh-rate-options');
+const refreshRateOptions = document.getElementById('refresh-rate-options');
 
 refreshRateOptions.addEventListener('show.bs.select', applyDropDownStyle);
 
 
 
-var commentDiv = document.getElementById('comments');
+const commentDiv = document.getElementById('comments');
 // Listen for when the scrolled window is below the header, 
 // this is when we will show our manual refresh button on the bottom right
 function scrollListener(){
@@ -264,7 +264,7 @@ and then still have the same theme when returing later
 @param lightBool - boolean value for if this should be light or dark theme (light == true, dark == false)
 */
 function updateThemeCookie(lightBool) {
-  let date = new Date();
+  const date = new Date();
   date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
   document.cookie = 'theme_cookie=' + lightBool + '; ' + 'expires=' + date.toUTCString() + ";path=/";
   lightTheme = lightBool;
@@ -274,7 +274,7 @@ and then still have the same refresh rate when returing later
 @param refreshRate - int value for how often the comments should refresh
 */
 function updateRefreshRateCookie(refreshRate) {
-  let date = new Date();
+  const date = new Date();
   date.setTime(date.getTime() + (7 * 24 * 60 * 60 * 1000));
   document.cookie = 'refresh_rate_cookie=' + refreshRate + '; ' + 'expires=' + date.toUTCString() + ";path=/";
   setRefreshRate(refreshRate);
@@ -283,7 +283,7 @@ function updateRefreshRateCookie(refreshRate) {
 // If it does exist apply existing theme else create new cookie and default to light theme.
 function loadOrCreateCookie(){
   if(document.cookie.indexOf('theme_cookie=') >= 0){
-     let boolStr = document.cookie
+     const boolStr = document.cookie
      .split('; ')
      .find(row => row.startsWith('theme_cookie='))
      .split('=')[1];
