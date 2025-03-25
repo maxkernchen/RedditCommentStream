@@ -1,7 +1,7 @@
 document.getElementById('spinner').style.display = 'none';
 document.getElementById('refresh-btn').style.display = 'none';
 
-const offset = new Date().getTimezoneOffset();
+const tz_offset = new Date().getTimezoneOffset();
 // bool for when scrolled down past our header, this for tracking if we should refresh or not.
 // Similar to youtube or twitch comments where scrolling stops the refreshing. 
 let scrolledDown = false;
@@ -75,7 +75,7 @@ async function startRace (){
         toggleTheme(true);
 
         const url = window.location.pathname;
-        const query = {time_zone_offset: offset};
+        const query = {time_zone_offset: tz_offset};
         const fetchParams = new URLSearchParams(query);
         
         try{

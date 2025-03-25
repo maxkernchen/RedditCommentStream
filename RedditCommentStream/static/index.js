@@ -1,47 +1,36 @@
 document.getElementById('spinner').style.display = 'none';
-// get all bootstrap active submission cards displayed on the home page
-const cards = document.getElementsByClassName('card');
+
+// get all active submission cards
+const active_submissions = document.getElementsByClassName('column');
 let form_comment_url = document.getElementById('form_comment_url')
 
-const offset = new Date().getTimezoneOffset();
-// if device is mobile use active-card-mobile css to format active submissions for mobile
-if(isMobile()){
-  for(let i = 0; i < cards.length; i++){
-    cards[i].classList.remove('active-card');
-    cards[i].classList.add('active-card-mobile');
-  }
-  const inputForm = document.getElementById('input-form');
-  inputForm.classList.remove('input-fields');
-  inputForm.classList.add('input-fields-mobile');
-}
+const tz_offset = new Date().getTimezoneOffset();
 
 // Loop through each card and add an event listener in its link element at the bottom.
 // This event when triggered will fill in the form and submit it with the submission the card represents.
 // It will also hide the input form and display a loading message/icon.
-for(let i = 0; i < cards.length; i++){
-    const cardTemp = cards[i];
-    const hiddenLink = cardTemp.getElementsByClassName('hidden')[0].innerHTML;
-    const link = cardTemp.getElementsByClassName('link')[0]
-    link.addEventListener('click', function (event) {
-      document.getElementById('all_input_container').style.display = 'none';
+for(let i = 0; i < active_submissions.length; i++){
+    const active_sub = active_submissions[i];
+    const hiddenLink = active_sub.getElementsByClassName('hidden')[0].innerHTML;
+    const link = active_sub.getElementsByClassName('link')[0]
 
-      document.getElementById('spinner').style.display='';
-  
+    link.addEventListener('click', function (event) {
       const formInput = document.getElementById('reddit_url');
       formInput.value = hiddenLink;
       // this call triggers submit event listener too.
       form_comment_url.requestSubmit();
-      
     });
 }
 
 
-
 form_comment_url.addEventListener('submit', function( event ) {
   event.preventDefault();
+  // display spinner
+  document.getElementById('all_input_container').style.display = 'none';
+  document.getElementById('spinner').style.display='';
+
   const formInput = document.getElementById('reddit_url');
-    
-  form_comment_url.insertAdjacentHTML('beforeend', '<input type="hidden" name="time_zone_offset" value="' + offset + '" >');
+  form_comment_url.insertAdjacentHTML('beforeend', '<input type="hidden" name="time_zone_offset" value="' + tz_offset + '" >');
   // change url to include submission id
   form_comment_url.setAttribute('action', getSubmissionId(formInput.value));
   form_comment_url.submit();
@@ -68,10 +57,6 @@ function getSubmissionId(redditUrl){
         subId += redditUrl + "/";
     }
     return subId;
-}
-// check if device is mobile via user agent
-function isMobile() {
-  return /Android|webOS|iPhone|iPad|iPod|IEMobile|BlackBerry|Opera Mini/i.test(navigator.userAgent);
 }
 
 

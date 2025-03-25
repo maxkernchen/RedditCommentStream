@@ -1,71 +1,32 @@
-:root{
-    --off-white: #e3ebec;
- }
- html, body {
-    margin: 0;
-    width: 99%;
+ html, body { 
     font-family: 'Montserrat', sans-serif;
   }
-div{
-    overflow-wrap: break-word;
-}
-.center{
-    margin: 0 auto;
-}
-#active-cards{
-    display: inline-flex;
-    flex-flow: row wrap;
-    justify-items: center;
-}
-.active-card{
-    width: 17vw;
-    margin: 7px;
-    min-height: 35vh;
-    box-shadow: 10px 7px 3px;
-}
-.active-card-mobile{
-    width: 90vw;
-    margin: 5%;
-    box-shadow: 10px 7px 3px;
-}
-.active-body{
-    background-color: var(--off-white);
-}
+
 .link {
     font-size: large;
     transition: .2s ease-out;
     cursor: pointer;   
 }
-/* naming convention for form is using underscores to match django side */
 #reddit_url{
     min-width:40vw;
 }
 .input-fields{
-    display: inline-block;
-    justify-items: center;
-    flex-direction: column;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
 }
-.input-fields-mobile{
-    display: inline;
-    justify-items: center;
-    flex-direction: column;
-}
+
 .link:hover {
 color: lightblue
 }
-.post-title{
-    text-overflow: ellipsis;
-}
+
 .hidden{
 display: none;
 }
 #spinner{
     color: white;
 }
-.error{
-    color: red;
-}
+
 #container{
-    background-image: url('/static/images/background.jpg');
     text-align: center;
 }
