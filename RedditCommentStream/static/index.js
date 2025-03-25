@@ -2,7 +2,7 @@ document.getElementById('spinner').style.display = 'none';
 
 // get all active submission cards
 const active_submissions = document.getElementsByClassName('column');
-let form_comment_url = document.getElementById('form_comment_url')
+let form_comment_url = document.getElementById('form-comment-url')
 
 const tz_offset = new Date().getTimezoneOffset();
 
@@ -26,7 +26,7 @@ for(let i = 0; i < active_submissions.length; i++){
 form_comment_url.addEventListener('submit', function( event ) {
   event.preventDefault();
   // display spinner
-  document.getElementById('all_input_container').style.display = 'none';
+  document.getElementById('all-input-container').style.display = 'none';
   document.getElementById('spinner').style.display='';
 
   const formInput = document.getElementById('reddit_url');

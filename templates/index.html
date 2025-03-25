@@ -42,7 +42,7 @@
   
   <br>
   <br>
-  <div id="all_input_container">
+  <div id="all-input-container">
     <p class="subtitle is-6">Enter url or just the submission id (after comments/) below e.g. </p>
     <p class="has-text-link">https://www.reddit.com/r/olympics/comments/1ecs0uk/olympics_opening_ceremony_megathread/</p>
     <p class="has-text-link">1ecs0uk</p>
@@ -50,7 +50,7 @@
       <p class="has-text-danger">The Reddit URL or Submission ID was not valid, please review and try again.</p>
     {% endif %}
     <div id="input-form" class="input-fields">
-      <form action="/process-url/" method="post" id="form_comment_url">
+      <form action="/process-url/" method="post" id="form-comment-url">
           {% csrf_token %}
           <div class="input-fields">
             <input id="reddit_url" class="input" type="text" name="reddit_url" value="" placeholder="Comment URL"  
