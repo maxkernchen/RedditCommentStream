@@ -52,6 +52,7 @@ def get_active_submissions():
 
         all_submissions = list(reddit_obj.subreddit('all').hot(limit=5000))
     except (praw.exceptions.PRAWException, prawcore.PrawcoreException, praw.exceptions.RedditAPIException) as e:
+        logger.error('PRAW Error on active submission: ' + e)
         # None is okay as the thread will just wait for next 5 minute interval
         return None
     # add any subreddits which are not in r/all and then filter profanity/posts with < 1000 comments

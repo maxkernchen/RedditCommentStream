@@ -1,4 +1,9 @@
- html, body { 
+  :root{
+    --fa-border-color: cornflowerblue;
+    --fa-border-width: 0.3vw;
+  }
+  
+  html, body { 
     font-family: 'Montserrat', sans-serif;
   }
 
@@ -7,6 +12,12 @@
     transition: .2s ease-out;
     cursor: pointer;   
 }
+#setting-dropdown{
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.5vw;
+}
+
 #reddit_url{
     min-width:40vw;
 }
@@ -26,7 +37,9 @@ display: none;
 #spinner{
     color: white;
 }
-
+.column{
+    margin: 0.5vw;
+}
 #container{
     text-align: center;
 }

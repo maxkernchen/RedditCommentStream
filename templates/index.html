@@ -16,12 +16,37 @@
   <link rel="stylesheet" href="{% static '/styles_index.css' %}" type="text/css">
 </head>
 <body>
+
+  <div id="setting-dropdown" class="dropdown is-right">
+    <div class="dropdown-trigger">
+      <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+        <i class="fa-solid fa-gear"></i>
+        
+      </button>
+    </div>
+    <div id="dropdown-menu" class="dropdown-menu"  role="menu">
+      <div id="dropdown-content"class="dropdown-content">
+        <div class="dropdown-item">
+          Theme:
+          <button onClick="toggleTheme('light')"> 
+            <i id="icon-light" class="fas fa-sun"></i>
+          </button> |
+          <button onClick="toggleTheme('dark')">
+            <i id="icon-dark" class="fas fa-moon"></i>
+          </button> |
+          <button onClick="toggleTheme('system')"> 
+              <i id="icon-system" class="fas">System</i>
+            </button> 
+        </div>
+      </div>
+    </div>
+  </div>
   
   <div id="container">
-    <h2 class='title'>Stream comments from any Reddit Submission</h2>
+    <h2 class='title'>Stream comments from any Reddit post</h2>
     <br>
     <br>
-    <h4 class="subtitle">Currently active Submissions:</h4>
+    <h4 class="subtitle">Currently active posts:</h4>
 
     <div class="columns">
       {%for active_sub in active_submissions_template%}        
