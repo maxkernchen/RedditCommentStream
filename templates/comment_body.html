@@ -1,9 +1,9 @@
 
-<div id="new-comments" class="hidden">
+<div id="new-comments" class="hidden ">
     {%for arthur, comment_time, comment_body in comments_template%}
-        
-        <li class="list-group-item center">{{arthur|safe}} - {{comment_time|safe}} - {{comment_body|safe}}
-        </li>
+        <div class="list-item">
+            <li class="comment">{{arthur|safe}} - {{comment_time|safe}} - {{comment_body|safe}}</li>
+        </div>
     {% endfor %}
 </div>
 

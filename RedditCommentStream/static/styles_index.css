@@ -3,10 +3,6 @@
     --fa-border-width: 0.3vw;
   }
   
-  html, body { 
-    font-family: 'Montserrat', sans-serif;
-  }
-
 .link {
     font-size: large;
     transition: .2s ease-out;

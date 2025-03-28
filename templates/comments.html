@@ -1,51 +1,58 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+{% load static %}
+<html>
 <head>
     <title>Streaming Comments</title>
-    <meta name="viewport" content="width=device-width, initial-scale=.8">
-    
-    {% load static %}
-
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-    integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js" 
-    referrerpolicy="no-referrer"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css"
-    integrity="sha512-ARJR74swou2y0Q2V9k0GbzQ/5vJ2RBSoCWokg4zkfM29Fb3vZEQyv0iWBMW/yvKgyHSR/7D64pFMmU8nYmbRkg=="
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" 
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" 
     crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"
-    integrity="sha512-yDlE7vpGDP7o2eftkCiPZ+yuUyEcaBwoJoIhdXv71KZWugFqEphIS3PU60lEkFaz8RxaVsMpSvQxMBaKVwA5xg=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" 
-    integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" 
-    crossorigin="anonymous"/>
 
     <link rel="stylesheet" href="{% static '/styles_comments.css' %}" type="text/css">
 </head>
 
 <body>
-    <div id="container">
-        <br>
-        <div id="header">
+  <div id="header">
 
-            <a href="/reddit-comment-stream" class="btn btn-outline-primary header-item" role="button">Create New Comment Stream</a>
+    <a href="/reddit-comment-stream" class="button header-item" role="button">
+        <i class="fa-solid fa-home"></i>
+    </a>
 
-            <button onClick="toggleTheme(false)" id="theme-btn" class="themeBtn btn btn-light header-item"> Theme:
-            <i id="theme-btn-icon" class="fas fa-sun"></i></button>
-            Refresh Rate
-            <select id="refresh-rate-options" class="selectpicker header-item" data-style="btn-secondary">
+    <div id="setting-dropdown" class="dropdown is-right header-item">
+        <div class="dropdown-trigger">
+          <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+        <div id="dropdown-menu" class="dropdown-menu" role="menu">
+          <div id="dropdown-content"class="dropdown-content">
+            <div class="dropdown-item">
+              Theme:
+              <button onClick="toggleTheme('light')"> 
+                <i id="icon-light" class="fas fa-sun"></i>
+              </button> |
+              <button onClick="toggleTheme('dark')">
+                <i id="icon-dark" class="fas fa-moon"></i>
+              </button> |
+              <button onClick="toggleTheme('system')"> 
+                  <i id="icon-system" class="fas">System</i>
+              </button> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+
+        
+      <div id="refresh-container">
+        Refresh Rate:
+        <div class="select refresh-item">
+            <select id="refresh-rate-options">
                 <option value="5000">5 seconds</option>
                 <option value="15000">15 seconds</option>
                 <option selected="selected" value="30000">30 seconds</option>
@@ -53,35 +60,39 @@
                 <option value="60000">60 seconds</option>
                 <option value="-1">Don't Refresh</option>
             </select>
-
-            <div id= "spinner" class="header-item">
-                <i class="fas fa-sync fa-spin fa-2x"></i>
-            </div>
-            <br>
-            <br>
-            <a href="{{post_url_template}}" class="post-link">{{title_template}}</a>
-
         </div>
-        <br>
-        <br>
+      
+        <div id="spinner" class="refresh-item">
+          <i class="fas fa-sync fa-spin fa-2x"></i>
+        </div>
+      </div>
+      
 
-        <div id="comments">
-            <ul class="list-group list-group-flush">
-                <div id="inner-comment-list">
-                    {%for arthur, comment_time, comment_body in comments_template%}
-                        <li class="list-group-item">{{arthur|safe}} - {{comment_time|safe}} - {{comment_body|safe}}</li>
-                    {% endfor %}
-                </div>
+        <a href="{{post_url_template}}" class="post-link">{{title_template}}</a>
+        <br>
+        <div id="comments" class="columns is-centered">
+          <div class="column">
+          <div class="list">
+            <ul>
+              <div id="inner-comment-list"> 
+                {%for arthur, comment_time, comment_body in comments_template%}     
+                  <div class="list-item"> 
+                    <li class="comment">{{arthur|safe}} - {{comment_time|safe}} - {{comment_body|safe}}</li>                
+                  </div>
+                {% endfor %}
+              </div>
             </ul>
+          </div>
+          </div>
         </div>
 
-        <button id="refresh-btn" class="btn btn-primary">
+       <button id="refresh-btn" class="button">
             <i class="fas fa-sync"></i>
         </button>
-    </div>
 
-    <script src={% static '/commentStream.js' %}></script>
+     
 </body>
+<script src={% static '/comment_stream.js' %}></script> 
 </html>
 
 

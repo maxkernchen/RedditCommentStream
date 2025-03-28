@@ -1,27 +1,30 @@
 :root{
-   --dark-color: #393d38;
-}
-.themeBtn{
-   border-radius: 6px;
-}
-html, body {
-   margin: 0;   
-}
-ul{
-   margin: 0%, auto;
-}
+   --fa-border-color: cornflowerblue;
+   --fa-border-width: 0.2rem;
+ }
 li{
    text-align: center;
 }
-.dark{
-   color:white;
-   background-color: var(--dark-color);
+#header{
+   display: flex;
+   justify-content: space-between;
 }
-.light{
-   color: black;
-   background-color: white;
+.header-item{
+   margin: 0.2rem;
+   text-wrap-mode: nowrap;
 }
+#refresh-container{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+.refresh-item{
+   margin: 1rem;
+}
+
 .post-link{
+   display: flex;
+   justify-content: center;
    text-decoration: none;
    font-size: x-large;
    transition: .2s ease-out;
@@ -33,22 +36,29 @@ li{
 .comment-time{
    display: inline-block;
 }
+.list-item{
+   border: 0.5px grey;
+   border-style: solid none none none;
+   margin-left: 3rem;
+   margin-right: 3rem;
+}
+.comment{
+   margin-top: 0.5rem;
+   margin-bottom: 0.5rem;
+}
 #refresh-btn{
    width: 50px;
    height: 50px;
    border-radius: 50%;
    right: 0;
    bottom: 0;
-   margin: 0px 15px 15px 0px;
+   margin: 0rem 1rem 1rem 1rem;
    position: fixed;
+   background-color: cornflowerblue;
    box-shadow: .5px 5px 15px rgba(0,0,0,.5);
 
 }
-#header{
-   display: inline-block;
-   text-align: center;
-   width: 100%
-}
+
 .hidden{
    transition: 500ms opacity;
    opacity: 0;
@@ -57,15 +67,12 @@ li{
    opacity: 1;
 }
 
-.header-item{
-   margin-right: 2vw;
-}
 .center{
    text-align: center;
 }
-#spinner{
-   display: inline-block;
-   position: fixed;
+#spinner{   
+  margin-left: 20rem;
+  position: fixed;
 }
 #comments{
    word-break: break-word;
