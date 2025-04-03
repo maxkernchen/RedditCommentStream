@@ -5,7 +5,7 @@ import praw.config
 import praw.exceptions
 import praw.models.reddit.more
 import prawcore.exceptions
-import requests
+import re
 from praw.models import MoreComments
 from pathlib import Path
 import os
@@ -22,7 +22,7 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
         and find the submission/newest comments. These comments are then compared to already loaded comments
         stored in the session cookie. Any comments comments that different from the already loaded ones are returned to
         views.py in a formatted string.
-        ----params-----
+        -----params-----
         @submission_id - the 6 char alphanumeric value that represents a submission
         @views_request - the request object from views.py, this is passed in to update the session cookie.
         @is_post       - the request is a POST so we will need additonal info returned in our dictionary
@@ -70,7 +70,8 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
             comments_arthur.append(comment.author.name)
             comments_time.append('<div class=\"comment-time\">' + str(datetime.fromtimestamp(comment.created_utc - (int(tz_offset) * 60),
                                                                 timezone.utc).replace(tzinfo=None)) + '</div>')
-            comments_body.append(detect_hyper_link(comment.body))
+            comment_body = format_emotes(comment)
+            comments_body.append(format_hyper_link(comment_body))
 
     #update session cookie with newly streamed comments
     views_request.session['loaded_comments_cookie'] = comments_cookie
@@ -88,7 +89,7 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
 def get_submission_id_from_url(comment_url):
     """ Simple helper method which will parse the full url of the reddit page and find the submission_id only
     This is useful as it allows the user to enter only the partial url or just the submission_id in the form.
-     -----params----
+     -----params-----
     @comment_url - the url or submission id the user has passed into our form
 
     @return - just the parsed submission_id
@@ -112,33 +113,71 @@ def get_submission_id_from_url(comment_url):
             return comment_url[index_start:index_end]
 
 
-def detect_hyper_link(comment_text):
+def format_hyper_link(comment_text):
     """ Simple helper method which will parse each comment and find if it contains a hyperlink in the reddit format
        e.g. [URL NAME](www.url.com)
-       -----params----
+       -----params-----
       @comment_text - text of the comment to check
 
       @return - the comment as is or parsed into an anchor tag for a hyperlink
       """
-    open_bracket_index    = comment_text.find('[')
-    closing_bracket_index = comment_text.find(']')
-    opening_parentheses_index = comment_text.find('(')
-    closing_parentheses_index = comment_text.find(')')
-    # verify bracket and paranthese are in the right place
-    if(open_bracket_index < closing_bracket_index and opening_parentheses_index < closing_parentheses_index and
-    opening_parentheses_index > open_bracket_index and opening_parentheses_index > closing_bracket_index):
-        anchor_text = '<a href="{0}">{1}</a>'
-        comment_text = comment_text[0:open_bracket_index] + \
-                       anchor_text.format(comment_text[opening_parentheses_index + 1:closing_parentheses_index],
-                                          comment_text[open_bracket_index + 1:closing_bracket_index]) + \
-                       comment_text[closing_parentheses_index + 1:len(comment_text) - 1]
+    anchor_html = '<a href="{0}">{1}</a>'
+    pattern_link = r'\[.+?\]\(https{0,1}:\/\/.+?\)'
+    matches = re.finditer(pattern_link, comment_text)
+    for match in matches:
+        start = int(match.regs[0][0])
+        end = int(match.regs[0][1])
+        link_str = match.string[start:end]
+        open_bracket_index = link_str.find('[')
+        closing_bracket_index = link_str.find(']')
+        opening_parentheses_index = link_str.find('(')
+        closing_parentheses_index = link_str.find(')')
+        # verify bracket and paranthese are in the right place then format the anchor html
+        # with our link and link name
+        if(open_bracket_index < closing_bracket_index and opening_parentheses_index < closing_parentheses_index and
+        opening_parentheses_index > open_bracket_index and opening_parentheses_index > closing_bracket_index):
+            anchor_html_filled = anchor_html.format(link_str[opening_parentheses_index + 1:closing_parentheses_index],
+                                            link_str[open_bracket_index + 1:closing_bracket_index])
+            comment_text = comment_text.replace(link_str, anchor_html_filled)
+
 
     return comment_text
 
 
+def format_emotes(comment):
+    """ Takes a comment object and finds all emotes usually in the form of ![img](emote|t5_2th52|1234)
+        then replaces these with the actual image stored in the media_metadata dictionary
+       -----params-----
+      @comment - the comment object which represents the current comment
+
+      @return - the comment text but with emotes correctly inserted or just the raw text if there are
+                no emotes.
+      """
+    if hasattr(comment, 'media_metadata'):
+        emote_html = '<img class="emote" alt="Comment Emote" src="{0}">'
+        comment_text = comment.body
+        pattern_whole = r'!\[img\]\(emote\|.+?\|[0-9].+?\)'
+        pattern_key = r'emote\|.+?\|[0-9]+'
+        matches = re.finditer(pattern_whole, comment_text)
+        for match in matches:
+            start = int(match.regs[0][0])
+            end = int(match.regs[0][1])
+            emote_str = match.string[start:end]
+            emote_key_search = re.search(pattern_key, emote_str)
+            emote_key = emote_key_search.group()
+            # replace emote with img tag that has source defined from dictionary 
+            if emote_key in comment.media_metadata:
+                emote_html_with_src = emote_html.format(comment.media_metadata[emote_key]['s']['u'])
+                comment_text = comment_text.replace(match.string[start:end], emote_html_with_src)
+        
+        return comment_text
+    else:
+        return comment.body
+
+
 def parse_submission_id(processing_url):
     """ Simple helper method which will parse the submission id from our processing url.
-     -----params----
+     -----params-----
     @processing_url - processing url in format /process-url/123abc
 
     @return - just the parsed submission_id

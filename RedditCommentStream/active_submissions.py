@@ -146,14 +146,14 @@ def add_excluded_subreddits(all_list, reddit_obj):
     for subreddit in excluded_subreddits:
         all_list += list(reddit_obj.subreddit(subreddit.strip()).hot(limit=10))
 
-def filter_posts(all_list):
+def filter_posts(all_posts_list):
     """ This method will filter posts to reduce number of submissions that we will fetch comments for.
     The main critera is that the number of comments in the submission is >= 1000 and that the title or subreddit name
     does not contain profanity.
     -----params-----
-    @all_list - the list of all submissions that we will filter down.
+    @all_posts_list - the list of all submissions that we will filter down.
     ---------------
-    @returns all_list with filtered critera
+    @returns all_posts_list with filtered critera
     """
     profanity.load_censor_words()
     # A file will be opened to read some custom profanity keywords which show up on more inappropriate subreddits
@@ -162,12 +162,12 @@ def filter_posts(all_list):
     with open(custom_badwords_dir) as file:
         custom_badwords = file.read().splitlines()
     profanity.add_censor_words(custom_badwords)
-    all_list = list(filter(lambda post: post.num_comments >= 1000 and not post.over_18, all_list))
-    all_list = list(filter(lambda post: not profanity.contains_profanity(post.title) and
-                            not is_profanity_split(post.subreddit_name_prefixed[2:])
+    all_posts_list = list(filter(lambda post: post.num_comments >= 1000 and not post.over_18, all_posts_list))
+    all_posts_list = list(filter(lambda post: not profanity.contains_profanity(post.title) and
+                            not is_profanity_split(post.subreddit_name_prefixed[2:].lower())
                             # check both word splits and whole subreddit as a word
-                            and not profanity.contains_profanity(post.subreddit_name_prefixed[2:]), all_list))
-    return all_list
+                            and not profanity.contains_profanity(post.subreddit_name_prefixed[2:].lower()), all_posts_list))
+    return all_posts_list
 
 def is_profanity_split(input_str):
     """ Because the subreddit name is combined without spaces e.g. r/ThisIsASubreddit

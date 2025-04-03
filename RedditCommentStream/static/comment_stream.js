@@ -1,11 +1,11 @@
-document.getElementById('spinner').style.display = 'none';
+document.getElementById('spinner').style.visibility = 'hidden';
 document.getElementById('refresh-btn').style.display = 'none';
 
 const tz_offset = new Date().getTimezoneOffset();
 updateAllDateTimeLocale()
 // Bool for when scrolled down past our header, this for tracking if we should refresh or not.
 // Where scrolling down stops the comment refreshing. 
-let scrolledDown = false;
+let scrolled_down = false;
 
 // set up dropdown event
 const setting_dropdown = document.getElementById('setting-dropdown');
@@ -20,7 +20,12 @@ const icon_system = document.getElementById('icon-system');
 // get localStorage saved theme if it exists, if not we'll just use the system value
 const theme_val_storage = localStorage.getItem('theme-val');
 theme_val_storage ? toggleTheme(theme_val_storage) : toggleTheme('system');
-
+// get saved refresh rate if it exists
+const refresh_rate_saved = localStorage.getItem('refresh-rate');
+if(refresh_rate_saved){
+  const refresh_rate_select = document.getElementById('refresh-rate-options');
+  refresh_rate_select.value = refresh_rate_saved;
+}
 
 
 /* Create three promises that will race each other.
@@ -38,78 +43,75 @@ theme_val_storage ? toggleTheme(theme_val_storage) : toggleTheme('system');
 
 async function startRace (){
   // get current refresh rate if refresh rate < 0 we don't refresh.
-  const refreshRateSelect = document.getElementById('refresh-rate-options');
-  const refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
+  const refresh_rate_select = document.getElementById('refresh-rate-options');
+  const refresh_rate_val = refresh_rate_select.options[refresh_rate_select.selectedIndex].value;
 
-  const promiseRefreshRate = new Promise(function(resolve) {
+  const promise_refresh_rate = new Promise(function(resolve) {
     // only resolve this promise if refresh rate is not set to don't refresh.'
     // resolve after the amount of time defined in the refresh rate drop down.
-      if(refreshRateInt > 0 && !scrolledDown) {
-        setTimeout(resolve, refreshRateInt, '1');
+      if(refresh_rate_val > 0 && !scrolled_down) {
+        setTimeout(resolve, refresh_rate_val, '1');
       }
       else {
         // resolve after 2 seconds so we are not calling too often to check if we have scrolled back up to the top
-        setTimeout(resolve, 2000, '-3');;
+        setTimeout(resolve, 2000, '-2');;
       }
     
   });
 
   // second promise which is resolved whenever the refresh rate drop is changed.
-  const promiseRefreshChanged = new Promise(function(resolve) {
+  const promise_refresh_changed = new Promise(function(resolve) {
       document.getElementById('refresh-rate-options').addEventListener('change', function(){
-          const refreshRateSelect = document.getElementById('refresh-rate-options');
-          const refreshRateInt = refreshRateSelect.options[refreshRateSelect.selectedIndex].value;
-          resolve('-2');
+        const refresh_rate_select = document.getElementById('refresh-rate-options');
+        const refresh_rate_val = refresh_rate_select.options[refresh_rate_select.selectedIndex].value;
+        localStorage.setItem('refresh-rate', refresh_rate_val)
+        resolve('-1');
       });
   });
   // third promise is the refresh button is clicked so refresh data right away.
-  const promiseRefreshClicked = new Promise(function(resolve) {
+  const promise_refresh_btn = new Promise(function(resolve) {
     document.getElementById('refresh-btn').addEventListener('click', () => {
       resolve(2);
     });
   });
 
-  Promise.race([promiseRefreshRate, promiseRefreshChanged, promiseRefreshClicked]).then(async function(value) {
+ Promise.race([promise_refresh_rate, promise_refresh_changed, promise_refresh_btn]).then(async function(value) {
+    // Make the fetch call to Django server if we have a > 0 refresh rate
+    // and we have not scrolled to where the manual refresh button is showing.
+    // But always refresh if we were called from the refresh button directly (resolve code 2)
+    if((refresh_rate_val > 0 && value > 0 && !scrolled_down) || value == 2){
+      // scroll to top of page when refresh button clicked
+      if(value == 2){
+        window.scrollTo({top: 0, behavior: 'smooth'});        
+      }
+      document.getElementById('spinner').style.visibility = 'visible';
+      const url = window.location.pathname;
+      const query = {time_zone_offset: tz_offset};
+      const fetch_params = new URLSearchParams(query);
+      
+      try 
+      {
+        const data = await (await fetch(url + "?" + fetch_params, {
+          method: 'GET'
+        })).text();
 
-  // Make the fetch call to Django server if we have a > 0 refresh rate
-  // and we have not scrolled to where the manual refresh button is showing.
-  // But always refresh if we were called from the refresh button directly (resolve code 2)
-  if((refreshRateInt > 0 && value > 0 && !scrolledDown) || value == 2){
-    // scroll to top of page when refresh button clicked
-        if(value == 2){
-          window.scrollTo({top: 0, behavior: 'smooth'});        
+        if(data){
+          addNewComments(data);
         }
-
-        document.getElementById('spinner').style.display='';
-
-        const url = window.location.pathname;
-        const query = {time_zone_offset: tz_offset};
-        const fetchParams = new URLSearchParams(query);
-        
-        try{
-          const data = await (await fetch(url + "?" + fetchParams, {
-            method: 'GET'
-          })).text();
-
-          if(data){
-            reloadComments(data);
-          }
-          else{
-            document.getElementById('spinner').style.display='none';
-            startRace();
-          }
-        } catch(error){
-          console.log('Refreshing Comments Failed: ' + error);
+        else{
+          document.getElementById('spinner').style.visibility = 'hidden';
           startRace();
         }
-          
-
-  }
-  else{
-      startRace();
+      } 
+      catch(error)
+      {
+        console.log('Refreshing Comments Failed: ' + error);
+        startRace();
+      }
     }
-  });
-
+    else{
+        startRace();
+    }});
 }
 // Entry point. This function is recalled often.
 startRace();
@@ -117,13 +119,13 @@ startRace();
 
 // hide spinner and populate data from GET response to entire page.
 // @param Data - GET response data, which will be our html template generated by views.py
-async function reloadComments(data){
+async function addNewComments(data){
  
-  document.getElementById('spinner').style.display='none';
+  document.getElementById('spinner').style.visibility = 'hidden';
   // remove parent div from previous new comments if they exist
-  let newComments = document.getElementById('new-comments');
-  if(newComments){
-    newComments.replaceWith(...newComments.childNodes);
+  let new_comments = document.getElementById('new-comments');
+  if(new_comments){
+    new_comments.replaceWith(...new_comments.childNodes);
   }
 
   document.getElementById('inner-comment-list').insertAdjacentHTML('afterbegin', data);
@@ -138,10 +140,6 @@ async function reloadComments(data){
   // call entry method again.
   startRace();
 }
-
-
-
-
 
 /* Method toggleTheme. This method allows us the change the theme of the page.
 @param - themeStr - the theme we are changing to valid values are light, dark, or system
@@ -168,52 +166,43 @@ function toggleTheme(themeStr){
 }
 
 
-const commentDiv = document.getElementById('comments');
+const comment_div = document.getElementById('comments');
 // Listen for when the scrolled window is below the header, 
 // this is when we will show our manual refresh button on the bottom right
 function scrollListener(){
-  if(window.scrollY > commentDiv.offsetTop){
-    scrolledDown = true;
+  if(window.scrollY > comment_div.offsetTop){
+    scrolled_down = true;
     document.getElementById('refresh-btn').style.display = ''
   }
-  else if(window.scrollY <= commentDiv.offsetTop){
-    scrolledDown = false;
+  else if(window.scrollY <= comment_div.offsetTop){
+    scrolled_down = false;
     document.getElementById('refresh-btn').style.display = 'none';
   }
 } 
-
 window.addEventListener('scroll', scrollListener);
 
-
 /*
-  Update every comment's date time into the  user's locale
+  Update every comment's date time into the user's locale
 */
 function updateAllDateTimeLocale(){
-
   document.querySelectorAll('.comment-time').forEach((el) => {
-    const commentTime = new Date(Date.parse(el.innerHTML));
-    const commentTimeToLocale = commentTime.toLocaleString();
-    el.replaceWith(commentTimeToLocale);
+    const comment_time = new Date(Date.parse(el.innerHTML));
+    const comment_time_locale = comment_time.toLocaleString();
+    el.replaceWith(comment_time_locale);
   });
  
 }
-
 /*
-  Update new comment's date time into the user's locale
+  Update only new comment's date time into the user's locale
 */
 function updateNewDateTimeLocale(){
   const new_comments = document.getElementById('new-comments');
   new_comments.querySelectorAll('.comment-time').forEach((el) => {
-    const commentTime = new Date(Date.parse(el.innerHTML));
-    const commentTimeToLocale = commentTime.toLocaleString();
-    el.replaceWith(commentTimeToLocale);
+    const comment_time = new Date(Date.parse(el.innerHTML));
+    const comment_time_locale = comment_time.toLocaleString();
+    el.replaceWith(comment_time_locale);
   });
 }
 
-/*
-  set refresh rate if it is stored in a cookie
-*/
-// function setRefreshRate(refreshRate){
-//   $('#refresh-rate-options').val(refreshRate);
-// }
+
 
