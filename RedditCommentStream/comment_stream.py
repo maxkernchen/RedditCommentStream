@@ -10,7 +10,7 @@ from praw.models import MoreComments
 from pathlib import Path
 import os
 __author__  = 'Max Kernchen'
-__version__ = '1.0.'
+__version__ = '1.1.'
 __email__   = 'max.f.kernchen@gmail.com'
 
 """ This module's main purpose is to retreive the latest comments from a submission, it is called often via fetch or the 
@@ -24,9 +24,10 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
         views.py in a formatted string.
         -----params-----
         @submission_id - the 6 char alphanumeric value that represents a submission
-        @views_request - the request object from views.py, this is passed in to update the session cookie.
+        @views_request - the request object from views.py, this is passed in to update the session 
+                         with previously loaded comments.
         @is_post       - the request is a POST so we will need additonal info returned in our dictionary
-
+        -----returns-----
         @return a dictionary with comments sorted by newest, the title and permalink if this is a POST request
     """
     config = configparser.ConfigParser()
@@ -50,14 +51,14 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
     i = 0
     comments_sorted = []
     comments_cookie = []
-    # get session cookie which stored the previous list of loaded comments
-    already_loaded_comments = views_request.session['loaded_comments_cookie']
+    # get session which stored the previous list of loaded comments
+    already_loaded_comments = views_request.session['loaded_comments']
     for comment in comment_list:
         if isinstance(comment, MoreComments):
             # for now we are only streaming top-level comments, no replies
             continue
         comments_sorted.append(comment)
-        # store just the comment id hex value to only load new comments between ajax calls
+        # store just the comment id hex value to only load new comments between fetch calls
         comments_cookie.append(comment.id)
 
     comments_arthur = []
@@ -68,13 +69,14 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
         # don't track deleted comments or comments which we've already loaded
         if(comment.author is not None and comment.id not in already_loaded_comments and not comment.stickied):
             comments_arthur.append(comment.author.name)
-            comments_time.append('<div class=\"comment-time\">' + str(datetime.fromtimestamp(comment.created_utc - (int(tz_offset) * 60),
-                                                                timezone.utc).replace(tzinfo=None)) + '</div>')
+            comments_time.append('<div class=\"comment-time\">' \
+                                 + str(datetime.fromtimestamp(comment.created_utc - (int(tz_offset) * 60),
+                                                              timezone.utc).replace(tzinfo=None)) + '</div>')
             comment_body = format_emotes(comment)
             comments_body.append(format_hyper_link(comment_body))
 
-    #update session cookie with newly streamed comments
-    views_request.session['loaded_comments_cookie'] = comments_cookie
+    # update session with newly streamed comments
+    views_request.session['loaded_comments'] = comments_cookie
     # store results in a dictionary, if this is a POST request on initial form submission
     # include the title and permalink
     submission_comments_dict = {}
@@ -91,7 +93,7 @@ def get_submission_id_from_url(comment_url):
     This is useful as it allows the user to enter only the partial url or just the submission_id in the form.
      -----params-----
     @comment_url - the url or submission id the user has passed into our form
-
+    -----returns-----
     @return - just the parsed submission_id
     """
     index_start = comment_url.find('comments')
@@ -118,8 +120,8 @@ def format_hyper_link(comment_text):
        e.g. [URL NAME](www.url.com)
        -----params-----
       @comment_text - text of the comment to check
-
-      @return - the comment as is or parsed into an anchor tag for a hyperlink
+      -----returns-----
+      @return - the comment as is or parsed into a anchor tag(s) for hyperlink(s)
       """
     anchor_html = '<a href="{0}">{1}</a>'
     pattern_link = r'\[.+?\]\(https{0,1}:\/\/.+?\)'
@@ -140,16 +142,15 @@ def format_hyper_link(comment_text):
                                             link_str[open_bracket_index + 1:closing_bracket_index])
             comment_text = comment_text.replace(link_str, anchor_html_filled)
 
-
     return comment_text
 
 
 def format_emotes(comment):
     """ Takes a comment object and finds all emotes usually in the form of ![img](emote|t5_2th52|1234)
         then replaces these with the actual image stored in the media_metadata dictionary
-       -----params-----
+      -----params-----
       @comment - the comment object which represents the current comment
-
+      -----returns-----
       @return - the comment text but with emotes correctly inserted or just the raw text if there are
                 no emotes.
       """
@@ -179,7 +180,7 @@ def parse_submission_id(processing_url):
     """ Simple helper method which will parse the submission id from our processing url.
      -----params-----
     @processing_url - processing url in format /process-url/123abc
-
+    -----returns-----
     @return - just the parsed submission_id
     """
     # get the submission url it will be at least 5 characters

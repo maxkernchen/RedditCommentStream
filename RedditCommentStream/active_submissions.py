@@ -13,15 +13,19 @@ from pathlib import Path
 import wordninja
 import logging
 import os
+import threading
 logger = logging.getLogger(__name__)
 __author__  = 'Max Kernchen'
-__version__ = '1.0.'
+__version__ = '1.1.'
 __email__   = 'max.f.kernchen@gmail.com'
 
 
 """ Module whoses main purpose is to fetch the top 5 active submissions currently on reddit, these 5 submissions
 are then stored in the index page. This module will be called by a seperte daemon thread. 
 """
+
+# for locking the changes to active submissions.
+active_sub_mutex = threading.Lock()
 
 def get_active_submissions():
     """ Fetches 5k of the most hot posts, then filters them down by eliminating posts with < 1000 comments
@@ -33,7 +37,8 @@ def get_active_submissions():
 
     WARNING - this method is long running, it takes an average of 5 mintues to complete due to the built in Reddit API
     calling limitations.
-
+    
+    -----returns-----
     @return - None if any exceptions are found, this is method is called every 5 minutes from a thread which does not
     expect any return values
 
@@ -49,7 +54,6 @@ def get_active_submissions():
                                  user_agent=config['bot1']['user_agent'])
 
         logger.info('Starting new iteration of active submissions')
-
         all_submissions = list(reddit_obj.subreddit('all').hot(limit=5000))
     except (praw.exceptions.PRAWException, prawcore.PrawcoreException, praw.exceptions.RedditAPIException) as e:
         logger.error('PRAW Error on active submission: ' + e)
@@ -67,35 +71,37 @@ def get_active_submissions():
             post = filtered_posts[i]
             comment_list_post = list(post.comments)
         except(praw.exceptions.PRAWException, prawcore.PrawcoreException, praw.exceptions.RedditAPIException) as e:
-            # None is okay as the thread will just wait for next 5 minute interval
+            logger.error('PRAW Error on active submission: ' + e)
+              # None is okay as the thread will just wait for next 5 minute interval
             return None
-        avg_time_between_comments = 0
+        time_between_comments = 0
         num_comments = 0
+        # compare 25 comments to get an average time between each comment.
         for j in range(25):
-            if j >= len(comment_list_post) - 1:
+            if j == len(comment_list_post) - 1:
                 break
-            temp_comment = comment_list_post[j]
-            next_temp_comment = comment_list_post[j + 1]
+            curr_comment = comment_list_post[j]
+            next_comment = comment_list_post[j + 1]
             # skip any comments which are stickied, deleted, or are a MoreComments object.
             # this is to prevent any issues with how the avg time between comments is calcuated, i.e. it should
             # never result in a negative value
-            if isinstance(temp_comment, MoreComments) or temp_comment.stickied or \
-                    temp_comment.author is None or isinstance(next_temp_comment, MoreComments) \
-                    or next_temp_comment.stickied or next_temp_comment.author is None:
+            if isinstance(curr_comment, MoreComments) or curr_comment.stickied or \
+                    curr_comment.author is None or isinstance(next_comment, MoreComments) \
+                    or next_comment.stickied or next_comment.author is None:
                 continue
-            difference = temp_comment.created_utc - next_temp_comment.created_utc
+            difference = curr_comment.created_utc - next_comment.created_utc
             if(difference > 0):
-                avg_time_between_comments += (temp_comment.created_utc - next_temp_comment.created_utc)
+                time_between_comments += (curr_comment.created_utc - next_comment.created_utc)
                 num_comments += 1
         # store the avg time where the key is the index of the list of posts and the value is the average time
         if(num_comments > 0):
-            avg_time_dict[i] = avg_time_between_comments / num_comments
+            avg_time_dict[i] = time_between_comments / num_comments
 
     i = 1
     # iterate through the dictionary ordered by the value, this results in top 5 most active posts with least time
     # between each new comment
     for k in sorted(avg_time_dict, key=avg_time_dict.get):
-        logger.info(str(avg_time_dict[k]) + '-' + str(k))
+        logger.info(str(i) + 'th most active post with: ' + str(avg_time_dict[k]) + ' comments per sec')
         store_post_data(filtered_posts[k], i, avg_time_dict[k])
         # only check top 5 values
         if(i == 5):
@@ -103,31 +109,37 @@ def get_active_submissions():
         i+=1
     logger.info('Finished iteration of active submissions')
 
-
 def store_post_data(post, rank, avg_comment_time):
-    """ Store the ActiveSubmissions model and delete any existing entries with same rank value
+    """ Store the ActiveSubmissions model and delete any existing entries with same rank value.
+        A global mutex is locked to ensure the results are not queried when one entry is replaced.
+        Otherwise we might return only 4 top submissions. 
     -----params-----
     @post - the Reddit Submission object to be saved
     @rank - the rank int of this submission
-    @avg_comment_time - the float value for each
+    @avg_comment_time - the float value of averge comments per second
     """
+    active_sub_mutex.acquire()
     ActiveSubmissions.objects.filter(rank=rank).delete()
     act_sub = ActiveSubmissions(submission_title=post.title,
                                 num_comments=post.num_comments,
                                 subreddit_name=post.subreddit_name_prefixed,
                                 submission_permalink='https://reddit.com' + post.permalink,
-                                one_comment_avg= round(avg_comment_time,2),
+                                one_comment_avg= round(avg_comment_time, 2),
                                 rank=rank)
     act_sub.save()
+    active_sub_mutex.release()
 
 def query_active_submissions():
     """ Query to ActiveSubmissions model to return all rows from the database.
+        Lock the mutex to make sure the database is not being updated while we query.
 
     @return - list of all ActiveSubmissions rows sorted by rank
     """
+    active_sub_mutex.acquire()
     all_act_subs = []
     if (ActiveSubmissions.objects.all().exists()):
         all_act_subs = ActiveSubmissions.objects.all().order_by('rank')
+    active_sub_mutex.release()
     return all_act_subs
 
 def add_excluded_subreddits(all_list, reddit_obj):
@@ -152,7 +164,7 @@ def filter_posts(all_posts_list):
     does not contain profanity.
     -----params-----
     @all_posts_list - the list of all submissions that we will filter down.
-    ---------------
+    -----returns-----
     @returns all_posts_list with filtered critera
     """
     profanity.load_censor_words()
@@ -172,6 +184,7 @@ def filter_posts(all_posts_list):
 def is_profanity_split(input_str):
     """ Because the subreddit name is combined without spaces e.g. r/ThisIsASubreddit
     I am using wordninja package to parse the words seperately and check if they contain profanity.
+    -----returns-----
     @return - boolean value True for the subreddit name contains profanity else False
     """
     word_list = wordninja.split(input_str)

@@ -2,10 +2,10 @@ import time
 from threading import Thread
 from . import active_submissions
 __author__  = 'Max Kernchen'
-__version__ = '1.0.'
+__version__ = '1.1.'
 __email__   = 'max.f.kernchen@gmail.com'
 
-""" Simple class whoses only purpose is to call get_active_submissions indefinitely every 5 minutes by default
+""" Class whoses only purpose is to call get_active_submissions indefinitely every 5 minutes by default
 This class is called by app.py on run of the Django server
 """
 
@@ -21,7 +21,7 @@ class ActiveSubmissionsThread(Thread):
         self.thread.daemon = True
 
     def run(self):
-        """ run method whichw will start the thread and wait for the interval defined to call
+        """ run method which will start the thread and wait for the interval defined to call
         get_active_submissions()
         """
         while True:

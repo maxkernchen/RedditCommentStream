@@ -2,36 +2,33 @@
     --fa-border-color: cornflowerblue;
     --fa-border-width: 0.3vw;
   }
-  
 .link {
     font-size: large;
     transition: .2s ease-out;
     cursor: pointer;   
+}
+.link:hover {
+    color: lightblue
 }
 #setting-dropdown{
     display: flex;
     justify-content: flex-end;
     margin: 0.5vw;
 }
-
+/* snake case to match python references to this form */
 #reddit_url{
     min-width:40vw;
+}
+.has-text-link{
+    word-wrap: break-word;
 }
 .input-fields{
     display: flex;
     justify-content: center;
     flex-direction: row;
 }
-
-.link:hover {
-color: lightblue
-}
-
 .hidden{
 display: none;
-}
-#spinner{
-    color: white;
 }
 .column{
     margin: 0.5vw;

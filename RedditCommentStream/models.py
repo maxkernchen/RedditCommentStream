@@ -1,6 +1,6 @@
 from django.db import models
 __author__  = 'Max Kernchen'
-__version__ = '1.0.'
+__version__ = '1.1.'
 __email__   = 'max.f.kernchen@gmail.com'
 
 """

@@ -12,14 +12,14 @@ from RedditCommentStream.models import ActiveSubmissions
 import logging
 logger = logging.getLogger(__name__)
 __author__  = 'Max Kernchen'
-__version__ = '1.0.'
+__version__ = '1.1.'
 __email__   = 'max.f.kernchen@gmail.com'
 
 
 def index(request):
     """ Method for loading the index page. Defined in URLS.py
     Will load the active submissions by calling query_active_submissions in active_submissions module
-
+    -----returns-----
     @return - a rendered page for our homepage index.html
     """
     return render(request, 'index.html', {'active_submissions_template':
@@ -29,15 +29,12 @@ def process_reddit_url(request):
     """
     Method for loading the comments page, will be used for both POST (original form submission) and GET
     (fetch in-page refresh request) requests. Defined in URLS.py
-
+    -----returns-----
     @return - a rendered page for /process_url or in case of errors /index.html with an error message
     """
     # if this is a POST request we need to process the form data
-    comments = ['No Results Found']
-
     if request.method == 'POST':
         form = RedditURL(request.POST)
-
         if form.is_valid():
             comment_url = form.cleaned_data['reddit_url']
             submission_id = comment_stream.get_submission_id_from_url(comment_url)
@@ -45,8 +42,8 @@ def process_reddit_url(request):
             # get local browser tz offset, this is stored in hidden input field.
             tz_offset = request.POST['time_zone_offset']
 
-            # initialize the cookie for storing alreay loaded comments, will be populated in comment stream call
-            request.session['loaded_comments_cookie'] = []
+            # for storing already loaded comments for each session, will be populated in the comment stream call
+            request.session['loaded_comments'] = []
             submission_comments_dict = comment_stream.get_comments(submission_id, request, True, tz_offset)
 
             if(submission_comments_dict is None):

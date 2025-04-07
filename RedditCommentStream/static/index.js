@@ -1,5 +1,4 @@
 document.getElementById('spinner').style.display = 'none';
-
 // get all active submission cards
 const active_submissions = document.getElementsByClassName('column');
 const form_comment_url = document.getElementById('form-comment-url')
@@ -10,6 +9,15 @@ setting_dropdown.addEventListener('click', function(event){
   setting_dropdown.classList.toggle('is-active');
 });
 
+// if user clicks back button instead of home, make sure input form is visible again
+window.onpageshow = function(event) {
+  if (event.persisted) {
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('all-input-container').style.display = '';
+    form_comment_url.reset();
+  }
+};
+
 const tz_offset = new Date().getTimezoneOffset();
 const icon_light = document.getElementById('icon-light');
 const icon_dark = document.getElementById('icon-dark');
@@ -17,7 +25,6 @@ const icon_system = document.getElementById('icon-system');
 // get localStorage saved theme if it exists, if not we'll just use the system value
 const theme_val_storage = localStorage.getItem('theme-val');
 theme_val_storage ? toggleTheme(theme_val_storage) : toggleTheme('system');
-
 
 // Loop through each card and add an event listener in its link element at the bottom.
 // This event when triggered will fill in the form and submit it with the submission the card represents.
@@ -35,7 +42,8 @@ for(let i = 0; i < active_submissions.length; i++){
     });
 }
 
-
+// on submission of the form hide the inputs and display the loading spinner
+// also add the time zone offset taken from user's local browser.
 form_comment_url.addEventListener('submit', function( event ) {
   event.preventDefault();
   // display spinner
@@ -49,8 +57,11 @@ form_comment_url.addEventListener('submit', function( event ) {
   form_comment_url.submit();
 });
 
-// add the submission id to the processing url. This is so we have a unique url which allows the user to open
-// multiple sessions for different streams of comments.
+/* Method getSubmissionId - add the submission id to the processing url. 
+   This is so we have a unique url which allows the user to open multiple sessions for different streams of comments.
+   @param - reddit_url the full url taken from the imputs, we will parse just the submission id out of it.
+   @returns - the submission id of the post.
+*/
 function getSubmissionId(reddit_url){
     let sub_id = "/process-url/";
     let index = reddit_url.toLowerCase().search("comments")
@@ -71,7 +82,9 @@ function getSubmissionId(reddit_url){
     }
     return sub_id;
 }
-
+/* Method toggleTheme - This method allows us the change the theme of the page.
+   @param - themeStr - the theme we are changing to valid values are light, dark, or system
+*/
 function toggleTheme(themeStr){
   document.documentElement.removeAttribute('class');
   icon_light.classList.remove('fa-border');
@@ -92,7 +105,3 @@ function toggleTheme(themeStr){
     localStorage.removeItem('theme-val');
   }
 }
-
-
-
-  
