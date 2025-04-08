@@ -2,9 +2,8 @@ Live Reddit Comments
 
   
 
-Live Reddit Comments is a Django web application which will allow a user to stream the newest comments from any Reddit submission, similar to live chat on Youtube.com or Twitch.tv. This application utilizes the Reddit Python API library named PRAW - https://praw.readthedocs.io/en/stable/index.html 
+Live Reddit Comments is a Django web application which will allow a user to stream the newest comments from any Reddit submission This application utilizes the Reddit Python API library named PRAW - https://praw.readthedocs.io/en/stable/index.html 
 
-  
 
 It is currently hosted below:
 
@@ -15,17 +14,15 @@ http://192.210.137.126:8000/reddit-comment-stream/
 
 Features include: 
 
-  * Dark or Light Theme which is stored in a Cookie. 
+  * Dark,Light, or System Theme which is stored for every user session.
 
-  * Option to change refresh rate of comments 
+  * Option to change refresh rate of comments, also saved for every user session. 
 
-  * Comments stop refreshing when scrolling and allow for a manual refresh 
+  * Comments stop refreshing when scrolling down and allow for a manual refresh. 
 
   * Home page contains top 5 most active submissions currently (submissions with least amount of time between comments). 
 
     These submissions cards contain a link to start streaming them directly. 
-
-     
 
      
 

@@ -14,17 +14,17 @@ class RedditCommentsConfig(AppConfig):
     def ready(self):
         """ Overridden ready method which will require us to import inline modules
         This will setup out logger and spawn our background thread for ActiveSubmissions.
-        Only runs for main process.
+        Only runs for main process by using --preload option for gunicorn
         """
-        if os.environ.get('RUN_MAIN'):
-            from . import active_submissions_thread
-            import logging
-            from logging.handlers import RotatingFileHandler
-            loggerCfg = logging.basicConfig(
-                                format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                                datefmt='%Y-%m-%d %H:%M:%S',
-                                level=logging.INFO,
-                                handlers=[RotatingFileHandler('RedditCommentsLog.txt', maxBytes=1000000, backupCount=10)])
+      
+        from . import active_submissions_thread
+        import logging
+        from logging.handlers import RotatingFileHandler
+        loggerCfg = logging.basicConfig(
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S',
+                            level=logging.INFO,
+                            handlers=[RotatingFileHandler('RedditCommentsLog.txt', maxBytes=1000000, backupCount=10)])
 
-            ActiveSubThread = active_submissions_thread.ActiveSubmissionsThread()
-            ActiveSubThread.thread.start()
+        ActiveSubThread = active_submissions_thread.ActiveSubmissionsThread()
+        ActiveSubThread.thread.start()

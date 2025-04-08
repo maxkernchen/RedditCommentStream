@@ -50,16 +50,16 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
 
     i = 0
     comments_sorted = []
-    comments_cookie = []
+    comments_sesssion = []
     # get session which stored the previous list of loaded comments
-    already_loaded_comments = views_request.session['loaded_comments']
+    already_loaded_comments = views_request.session['loaded_comments' + submission_id]
     for comment in comment_list:
         if isinstance(comment, MoreComments):
             # for now we are only streaming top-level comments, no replies
             continue
         comments_sorted.append(comment)
         # store just the comment id hex value to only load new comments between fetch calls
-        comments_cookie.append(comment.id)
+        comments_sesssion.append(comment.id)
 
     comments_arthur = []
     comments_time = []
@@ -76,7 +76,7 @@ def get_comments(submission_id, views_request, is_post, tz_offset):
             comments_body.append(format_hyper_link(comment_body))
 
     # update session with newly streamed comments
-    views_request.session['loaded_comments'] = comments_cookie
+    views_request.session['loaded_comments' + submission_id] = comments_sesssion
     # store results in a dictionary, if this is a POST request on initial form submission
     # include the title and permalink
     submission_comments_dict = {}

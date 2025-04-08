@@ -43,7 +43,7 @@ def process_reddit_url(request):
             tz_offset = request.POST['time_zone_offset']
 
             # for storing already loaded comments for each session, will be populated in the comment stream call
-            request.session['loaded_comments'] = []
+            request.session['loaded_comments' + submission_id] = []
             submission_comments_dict = comment_stream.get_comments(submission_id, request, True, tz_offset)
 
             if(submission_comments_dict is None):
