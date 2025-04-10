@@ -1,0 +1,3 @@
+2025-04-10 19:11:17,676 RedditCommentStream.active_submissions INFO Starting new iteration of active submissions
+2025-04-10 19:11:18,687 RedditCommentStream.active_submissions INFO Starting new iteration of active submissions
+2025-04-10 19:11:18,700 django.utils.autoreload INFO Watching for file changes with StatReloader

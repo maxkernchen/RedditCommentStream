@@ -20,11 +20,17 @@ class RedditCommentsConfig(AppConfig):
         from . import active_submissions_thread
         import logging
         from logging.handlers import RotatingFileHandler
+        logs_dir = "reddit_stream_logs"
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir)
+
+        log_name = os.path.join(logs_dir, 'RedditStreamLog.txt')
+
         loggerCfg = logging.basicConfig(
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             level=logging.INFO,
-                            handlers=[RotatingFileHandler('RedditCommentsLog.txt', maxBytes=1000000, backupCount=10)])
+                            handlers=[RotatingFileHandler(log_name, maxBytes=1000000, backupCount=10)])
 
         ActiveSubThread = active_submissions_thread.ActiveSubmissionsThread()
         ActiveSubThread.thread.start()

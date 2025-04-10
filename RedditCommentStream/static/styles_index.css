@@ -1,13 +1,13 @@
-  :root{
+:root{
     --fa-border-color: cornflowerblue;
     --fa-border-width: 0.3vw;
-  }
-.link {
+}
+.link{
     font-size: large;
     transition: .2s ease-out;
     cursor: pointer;   
 }
-.link:hover {
+.link:hover{
     color: lightblue
 }
 #setting-dropdown{
@@ -28,7 +28,7 @@
     flex-direction: row;
 }
 .hidden{
-display: none;
+    display: none;
 }
 .column{
     margin: 0.5vw;
