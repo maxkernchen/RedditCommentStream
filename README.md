@@ -1,7 +1,7 @@
 ## Stream Reddit Comments 
 
   
-Stream Reddit Comments is a Django web application which allows a user to stream the newest comments from any Reddit submission This application utilizes the Reddit Python API library named [PRAW](https://praw.readthedocs.io/en/stable/index.html) 
+Stream Reddit Comments is a Django web application which allows a user to stream the newest comments from any Reddit submission. This application utilizes the Reddit Python API library named [PRAW](https://praw.readthedocs.io/en/stable/index.html) 
 
 
 It is currently hosted below:
@@ -21,7 +21,7 @@ Features include:
 
     These submissions cards contain a link to start streaming them directly. 
 
-  * Ability to stream multiple posts concurrently in seperate browser tabs.
+  * Ability to stream multiple posts concurrently in separate browser tabs.
 
 
 
@@ -46,12 +46,12 @@ Technical Talking Points:
       which only shows up if they scroll down past the header of page. This promise will immediately refresh the comments. 
 
         * These three Promises race each other, so whichever one finishes first will then go into a final method.
-      This method checks the resolution code and either sends an Fetch request to the Django server, or restarts the timers for another iteration.
+      This method checks the resolution code and either sends a Fetch request to the Django server, or restarts the timers for another iteration.
 
   *  A daemon thread has been created that finds active submissions on startup of the web server and runs indefinitely. 
      This thread will fetch submissions from Reddit that are considered “hot” with a limit of 5,000 total posts. We will also only consider posts that have at least 1,000 comments.  
      I then check the newest comments for each submission and compare the time between the current and next comment. This total difference is then averaged and sorted.  
-     The top 5 submission with the least average time between comments is then stored in a Django Model table, in this case called ActiveSubmissions. These records are fetched from the Django database each time the user browses to the home page. 
+     The top 5 submissions with the least average time between comments, are then stored in a Django Model table, in this case called ActiveSubmissions. These records are fetched from the Django database each time the user browses to the home page. 
      
      Because the site may query the database while a new row is being replaced, a mutex is used to prevent a situation where the user may see only 4 top submissions instead of 5.
 
