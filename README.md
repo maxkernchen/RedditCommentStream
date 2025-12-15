@@ -6,8 +6,8 @@ Stream Reddit Comments is a Django web application which allows a user to stream
 
 It is currently hosted below:
 
-http://152.53.55.203:8000/reddit-comment-stream/
-  
+http://152.53.169.53:8000/reddit-comment-stream/
+
 
 Features include: 
 

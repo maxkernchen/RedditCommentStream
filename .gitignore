@@ -4,3 +4,4 @@ RedditCommentStream/custom_profanity_keywords.txt
 RedditCommentStream/settings.py
 */__pycache__/*
 db.sqlite3
+/RedditStreamEnv/*
